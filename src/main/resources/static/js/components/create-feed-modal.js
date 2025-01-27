@@ -11,6 +11,15 @@ let elements = {
     $fileInput: $modal.querySelector('#fileInput')
 }
 
+// 모달 바디 스텝을 이동하는 함수
+const goToStep = step => {
+    // 기존 스텝 컨테이너의 active를 제거하고 해당 step 컨테이너에 active 부여
+    [...$modal.querySelectorAll('.step')].forEach(($stepContainer, index) => {
+        $stepContainer.classList.toggle('active', step === index + 1)
+    })
+}
+
+
 // 파일 업로드 관련 이벤트 함수
 const setUpFileUploadEvents = () => {
     const { $uploadBtn, $fileInput } = elements;
@@ -24,18 +33,22 @@ const setUpFileUploadEvents = () => {
         }
         // 파일이 이미지인지 확인
         const validFiles = files.filter(file => {
-            if (!file.type.startsWith('image')) {
-                alert(`${file.name}은(는) 이미지가 아닙니다.`)
-                return false
-            }
-            return true
-        }).filter(file => {
+
+        //     if (!file.type.startsWith('image')) {
+        //         alert(`${file.name}은(는) 이미지가 아닙니다.`)
+        //         return false
+        //     }
+        //     return true
+        // }).filter(file => {
             if (file.size > 10 * 1024 * 1024) {
                 alert(`${file.name}은(는) 10MB를 초과합니다.`)
                 return false
             }
             return true
         })
+
+        goToStep(2)
+
     }
 
     // 업로드 버튼을 누르면 파일선택창이 대신 눌리도록 조작
