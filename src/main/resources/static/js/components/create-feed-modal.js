@@ -80,6 +80,9 @@ const setUpFileUploadEvents = () => {
         const step2Carousel = new CarouselManager($modal.querySelector('.preview-container'));
         step2Carousel.init(validFiles); // 필터링된 이미지파일 전달
 
+        const step3Carousel = new CarouselManager($modal.querySelector('.write-container'));
+        step3Carousel.init(validFiles); // 필터링된 이미지파일 전달
+
         goToStep(2)
 
     }
