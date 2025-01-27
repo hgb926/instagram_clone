@@ -177,12 +177,26 @@ const setUpModalEvents = () => {
     })
 }
 
+const setUpTextareaEvents = () => {
+    const { $contentTextArea, $charCounter } = elements;
+    $contentTextArea.addEventListener('input', () => {
+        const length = $contentTextArea.value.length;
+        $charCounter.textContent = `${length.toString()} / 2,200`
+
+        if (length > 2200) {
+            $charCounter.classList.add('exceed');
+            $contentTextArea.value = $contentTextArea.value.slice(0, 2200);
+        } else {
+            $charCounter.classList.remove('exceed');
+        }
+    })
+}
 
 // 이벤트 바인딩 관련 함수
 const bindEvent = () => {
-    setUpModalEvents()
-    setUpFileUploadEvents()
-
+    setUpModalEvents() // 모달 관련 이벤트
+    setUpFileUploadEvents() // 파일 업로드 관련 이벤트
+    setUpTextareaEvents() // 텍스트 입력 관련 이벤트
 }
 
 

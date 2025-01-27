@@ -89,7 +89,7 @@
                 <textarea
                         maxlength="2200"
                         rows="10"></textarea>
-              <div class="char-counter"></div>
+              <div class="char-counter">0/2,200</div>
             </div>
             <div class="additional-options">
               <div class="option-item">
