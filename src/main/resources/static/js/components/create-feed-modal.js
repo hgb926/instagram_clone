@@ -20,6 +20,20 @@ let elements = {
     $backStepBtn: $modal.querySelector('.back-button'),
     $nextStepBtn: $modal.querySelector('.next-button'),
     $modalTitle: $modal.querySelector('.modal-title'),
+    $uploadArea: $modal.querySelector('.upload-area'), // 드래그 영역
+    $contentTextArea: $modal.querySelector('.content-input textarea'),
+    $charCounter: $modal.querySelector('.char-counter'),
+}
+
+// 파일을 검사하는 함수
+const validateFiles = files => {
+    return files.filter(file => {
+        if (file.size > 10 * 1024 * 1024) {
+            alert(`${file.name}은(는) 10MB를 초과합니다.`)
+            return false
+        }
+        return true
+    })
 }
 
 // 모달 바디 스텝을 이동하는 함수
@@ -56,7 +70,7 @@ const goToStep = step => {
 
 // 파일 업로드 관련 이벤트 함수
 const setUpFileUploadEvents = () => {
-    const {$uploadBtn, $fileInput} = elements;
+    const {$uploadBtn, $fileInput, $uploadArea} = elements;
 
     // 파일을 검사하고 다음 단계로 이동하는 함수
     const handleFiles = files => {
@@ -65,21 +79,9 @@ const setUpFileUploadEvents = () => {
             alert('최대 10개의 파일만 선택 가능합니다.')
             return
         }
-        // 파일이 이미지인지 확인
-        const validFiles = files.filter(file => {
 
-            //     if (!file.type.startsWith('image')) {
-            //         alert(`${file.name}은(는) 이미지가 아닙니다.`)
-            //         return false
-            //     }
-            //     return true
-            // }).filter(file => {
-            if (file.size > 10 * 1024 * 1024) {
-                alert(`${file.name}은(는) 10MB를 초과합니다.`)
-                return false
-            }
-            return true
-        })
+        // 파일이 이미지인지 확인
+        const validFiles = validateFiles(files)
 
         // 이미지 슬라이드 생성
         step2Carousel = new CarouselManager($modal.querySelector('.preview-container'));
@@ -103,6 +105,35 @@ const setUpFileUploadEvents = () => {
         const files = Array.from(e.target.files) // 유사배열 -> 배열 변환
         if (files.length > 0) handleFiles(files);
     })
+
+
+    // 파일 드래그 & 드롭 이벤트
+    // 드래그 영역에 진입했을 때
+    let flag = false
+    $uploadArea.addEventListener('dragover', e => {
+        e.preventDefault();
+        if (flag) return
+        flag = true
+        $uploadArea.classList.add('dragover')
+    })
+    // 드래그 영역에서 나갔을 때
+    $uploadArea.addEventListener('dragleave', e => {
+        e.preventDefault();
+        console.log('나감')
+        $uploadArea.classList.remove('dragover')
+        flag = false
+    })
+
+    // 드래그 영역에 드롭했을 때
+    $uploadArea.addEventListener('drop', e => {
+        e.preventDefault(); // 드롭했을 때 이미지 새탭이 열리거나 파일이 다운로드 되는것을 방지
+
+        // 파일정보 얻어오기
+        const files = [...e.dataTransfer.files]
+        console.log(files)
+        if (files.length > 0) handleFiles(files)
+    })
+
 }
 
 // 피드 생성 모달 관련 이벤트 함수
@@ -146,10 +177,12 @@ const setUpModalEvents = () => {
     })
 }
 
+
 // 이벤트 바인딩 관련 함수
 const bindEvent = () => {
     setUpModalEvents()
     setUpFileUploadEvents()
+
 }
 
 
