@@ -1,6 +1,7 @@
 /* src/main/resources/static/js/components/stories.js */
 
 export default function initStories() {
+  console.log('initStories')
   const $storiesList = document.querySelector('.stories-list');
   const $prevButton = document.querySelector('.stories-prev');
   const $nextButton = document.querySelector('.stories-next');
