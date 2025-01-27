@@ -1,4 +1,6 @@
 
+import CarouselManager from "../ui/CarouselManager.js";
+
 // step 모듈 내에서 전역관리
 let currentStep = 1;
 
@@ -23,7 +25,7 @@ const goToStep = step => {
 
     currentStep = step
 
-    const { $backStepBtn, $nextStepBtn, $modalTitle } = elements;
+    const {$backStepBtn, $nextStepBtn, $modalTitle} = elements;
 
     // 기존 스텝 컨테이너의 active를 제거하고 해당 step 컨테이너에 active 부여
     [...$modal.querySelectorAll('.step')].forEach(($stepContainer, index) => {
@@ -49,7 +51,7 @@ const goToStep = step => {
 
 // 파일 업로드 관련 이벤트 함수
 const setUpFileUploadEvents = () => {
-    const { $uploadBtn, $fileInput } = elements;
+    const {$uploadBtn, $fileInput} = elements;
 
     // 파일을 검사하고 다음 단계로 이동하는 함수
     const handleFiles = files => {
@@ -61,12 +63,12 @@ const setUpFileUploadEvents = () => {
         // 파일이 이미지인지 확인
         const validFiles = files.filter(file => {
 
-        //     if (!file.type.startsWith('image')) {
-        //         alert(`${file.name}은(는) 이미지가 아닙니다.`)
-        //         return false
-        //     }
-        //     return true
-        // }).filter(file => {
+            //     if (!file.type.startsWith('image')) {
+            //         alert(`${file.name}은(는) 이미지가 아닙니다.`)
+            //         return false
+            //     }
+            //     return true
+            // }).filter(file => {
             if (file.size > 10 * 1024 * 1024) {
                 alert(`${file.name}은(는) 10MB를 초과합니다.`)
                 return false
@@ -74,17 +76,23 @@ const setUpFileUploadEvents = () => {
             return true
         })
 
+        // 이미지 슬라이드 생성
+        const step2Carousel = new CarouselManager($modal.querySelector('.preview-container'));
+        step2Carousel.init(validFiles); // 필터링된 이미지파일 전달
+
         goToStep(2)
 
     }
 
     // 업로드 버튼을 누르면 파일선택창이 대신 눌리도록 조작
-    $uploadBtn.addEventListener('click', e => {$fileInput.click()})
+    $uploadBtn.addEventListener('click', e => {
+        e.preventDefault();
+        $fileInput.click()
+    })
 
     // 파일 선택이 끝났을 때 파일정보를 읽는 이벤트
     $fileInput.addEventListener('change', e => {
-        console.log(e.target.files)
-        const files = [e.target.files] // 유사배열 -> 배열 변환
+        const files = Array.from(e.target.files) // 유사배열 -> 배열 변환
         if (files.length > 0) handleFiles(files);
     })
 }
@@ -92,7 +100,7 @@ const setUpFileUploadEvents = () => {
 // 피드 생성 모달 관련 이벤트 함수
 const setUpModalEvents = () => {
 
-    const { $closeBtn, $backdrop, $backStepBtn, $nextStepBtn } = elements;
+    const {$closeBtn, $backdrop, $backStepBtn, $nextStepBtn} = elements;
 
     // 모달 열기
     const openModal = (e) => {
@@ -121,7 +129,13 @@ const setUpModalEvents = () => {
 
     // 모달 이전, 다음 스텝 클릭 이벤트
     $backStepBtn.addEventListener('click', () => goToStep(currentStep - 1))
-    $nextStepBtn.addEventListener('click', () => goToStep(currentStep + 1))
+    $nextStepBtn.addEventListener('click', () => {
+        if (currentStep < 3) {
+            goToStep(currentStep + 1)
+        } else {
+            alert('서버로 게시물을 공유합니다.')
+        }
+    })
 }
 
 // 이벤트 바인딩 관련 함수
