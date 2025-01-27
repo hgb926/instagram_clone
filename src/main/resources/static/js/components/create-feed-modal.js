@@ -23,6 +23,9 @@ let elements = {
     $uploadArea: $modal.querySelector('.upload-area'), // 드래그 영역
     $contentTextArea: $modal.querySelector('.content-input textarea'),
     $charCounter: $modal.querySelector('.char-counter'),
+    $nestedModal: $modal.querySelector('.nested-modal'),
+    $deleteBtn: $modal.querySelector('.delete-button'),
+    $cancelBtn: $modal.querySelector('.cancel-button'),
 }
 
 // 파일을 검사하는 함수
@@ -139,7 +142,7 @@ const setUpFileUploadEvents = () => {
 // 피드 생성 모달 관련 이벤트 함수
 const setUpModalEvents = () => {
 
-    const {$closeBtn, $backdrop, $backStepBtn, $nextStepBtn} = elements;
+    const {$closeBtn, $backdrop, $backStepBtn, $nextStepBtn, $nestedModal} = elements;
 
     // 모달 열기
     const openModal = (e) => {
@@ -151,8 +154,15 @@ const setUpModalEvents = () => {
     // 모달 닫기
     const closeModal = e => {
         e.preventDefault()
+
+        // step2부터는 모달을 닫으면 안됨. 대신 새로운 모달을 띄워야 함
+        if (currentStep > 1) {
+            $nestedModal.style.display = 'flex'
+            return;
+        }
+
         $modal.style.display = 'none'
-        document.body.style.overflow = 'auth'; // 배경 body 스크롤 방지 해제
+        document.body.style.overflow = 'auto'; // 배경 body 스크롤 방지 해제
     }
 
     // 피드 생성 모달 열기 이벤트
