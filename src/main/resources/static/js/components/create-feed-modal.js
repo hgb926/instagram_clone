@@ -4,6 +4,10 @@ import CarouselManager from "../ui/CarouselManager.js";
 // step 모듈 내에서 전역관리
 let currentStep = 1;
 
+// 캐러셀 전역 변수
+let step2Carousel;
+let step3Carousel
+
 // 피드 생성 모달 전역관리
 let $modal = document.getElementById("createPostModal");
 
@@ -25,7 +29,7 @@ const goToStep = step => {
 
     currentStep = step
 
-    const {$backStepBtn, $nextStepBtn, $modalTitle} = elements;
+    const {$backStepBtn, $nextStepBtn, $modalTitle, $fileInput} = elements;
 
     // 기존 스텝 컨테이너의 active를 제거하고 해당 step 컨테이너에 active 부여
     [...$modal.querySelectorAll('.step')].forEach(($stepContainer, index) => {
@@ -34,6 +38,7 @@ const goToStep = step => {
 
     // 각 스텝별 버튼 활성화/비활성화 처리
     if (step === 1) {
+        $fileInput.value = '' // 취소 후 change이벤트 발동을 위한 리셋
         $nextStepBtn.style.display = 'none'
         $backStepBtn.style.display = 'hidden'
         $modalTitle.textContent = '새 게시물 만들기'
@@ -77,10 +82,10 @@ const setUpFileUploadEvents = () => {
         })
 
         // 이미지 슬라이드 생성
-        const step2Carousel = new CarouselManager($modal.querySelector('.preview-container'));
+        step2Carousel = new CarouselManager($modal.querySelector('.preview-container'));
         step2Carousel.init(validFiles); // 필터링된 이미지파일 전달
 
-        const step3Carousel = new CarouselManager($modal.querySelector('.write-container'));
+        step3Carousel = new CarouselManager($modal.querySelector('.write-container'));
         step3Carousel.init(validFiles); // 필터링된 이미지파일 전달
 
         goToStep(2)
