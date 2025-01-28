@@ -1,0 +1,35 @@
+package com.example.instagramclone.controller.rest;
+
+import com.example.instagramclone.domain.post.dto.request.PostCreate;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/posts")
+@Slf4j
+@RequiredArgsConstructor
+public class PostController {
+
+    // @RequestPart -
+    // 기본적인 header는 content-type: application/json을 쓰지만 그외 (사진, 동영상 등등)의 파일이라면
+    // content-type: image/jpg 이런식으로 header를 보내야한다, 그래서 이 두개는 같이 사용할 수 없지만
+    // @RequestPart를 사용하면 boundary를 통해서 구분지어 *한번에* 전송 가능
+
+    @PostMapping
+    public ResponseEntity<?> createFeed(
+            @RequestPart @Valid PostCreate postCreate
+            ,@RequestPart List<MultipartFile> images) {
+
+
+        return ResponseEntity
+                .ok().body(null);
+    }
+
+}
