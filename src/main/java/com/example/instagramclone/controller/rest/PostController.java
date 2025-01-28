@@ -27,12 +27,25 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<?> createFeed(
-            @RequestPart @Valid PostCreate postCreate
-            ,@RequestPart List<MultipartFile> images) {
-        postService.createFeed(postCreate);
+            // 피드 내용, 작성자 이름 JSON { "writer": "", "content": "" } -> 검증
+            @RequestPart("feed") @Valid PostCreate postCreate
+            // 이미지 파일 목록 multipart-file
+            , @RequestPart("images") List<MultipartFile> images
+    ) {
+
+        images.forEach(image -> {
+            log.info("uploaded image file name - {}", image.getOriginalFilename());
+        });
+
+        postCreate.setImages(images);
+        log.info("feed create request: POST - {}", postCreate);
+
+        // 이미지와 JSON을 서비스클래스로 전송
+        Long postId = postService.createFeed(postCreate);
 
         return ResponseEntity
-                .ok().body(null);
+                .ok()
+                .body("success to create feed : id - " + postId);
     }
 
 }
