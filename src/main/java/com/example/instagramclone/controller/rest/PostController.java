@@ -1,6 +1,7 @@
 package com.example.instagramclone.controller.rest;
 
 import com.example.instagramclone.domain.post.dto.request.PostCreate;
+import com.example.instagramclone.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
@@ -17,6 +18,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
 
+    private final PostService postService;
+
     // @RequestPart -
     // 기본적인 header는 content-type: application/json을 쓰지만 그외 (사진, 동영상 등등)의 파일이라면
     // content-type: image/jpg 이런식으로 header를 보내야한다, 그래서 이 두개는 같이 사용할 수 없지만
@@ -26,7 +29,7 @@ public class PostController {
     public ResponseEntity<?> createFeed(
             @RequestPart @Valid PostCreate postCreate
             ,@RequestPart List<MultipartFile> images) {
-
+        postService.createFeed(postCreate);
 
         return ResponseEntity
                 .ok().body(null);
