@@ -28,16 +28,6 @@ let elements = {
     $cancelBtn: $modal.querySelector('.cancel-button'),
 }
 
-// 파일을 검사하는 함수
-const validateFiles = files => {
-    return files.filter(file => {
-        if (file.size > 10 * 1024 * 1024) {
-            alert(`${file.name}은(는) 10MB를 초과합니다.`)
-            return false
-        }
-        return true
-    })
-}
 
 // 모달 바디 스텝을 이동하는 함수
 const goToStep = step => {
@@ -81,6 +71,17 @@ const setUpFileUploadEvents = () => {
         if (files.length > 10) {
             alert('최대 10개의 파일만 선택 가능합니다.')
             return
+        }
+
+        // 파일을 검사하는 함수
+        const validateFiles = files => {
+            return files.filter(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`${file.name}은(는) 10MB를 초과합니다.`)
+                    return false
+                }
+                return true
+            })
         }
 
         // 파일이 이미지인지 확인
