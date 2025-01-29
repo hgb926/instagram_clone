@@ -1,12 +1,13 @@
+import CarouselManager from "../ui/CarouselManager.js";
 
 
 // 피드가 들어갈 전체 영역
+
 const $feedContainer = document.querySelector('.feed-container')
 
 
-
 // 한개의 피드를 렌더링하는 함수
-function createFeedItem({ writer, content, images, createdAt }) {
+function createFeedItem({writer, content, images, createdAt}) {
 
 
     return `
@@ -32,8 +33,8 @@ function createFeedItem({ writer, content, images, createdAt }) {
           <div class="carousel-track">
             <!--     이미지 목록 배치      -->
             ${images.map(img => {
-                   return `<img src="${img.imageUrl}" alt="feed image${img.imageOrder}"/>`
-            }).join('')}
+        return `<img src="${img.imageUrl}" alt="feed image${img.imageOrder}"/>`
+    }).join('')}
           </div>
           ${
         images.length > 1
@@ -46,9 +47,9 @@ function createFeedItem({ writer, content, images, createdAt }) {
             </button>
             <div class="carousel-indicators">
                 <!--        인디케이터 렌더링        -->
-                ${images.map((_, i) => 
-                    `<span class="indicator ${i === 0 ? 'active' : ''}"></span>`
-                    ).join('')}
+                ${images.map((_, i) =>
+                `<span class="indicator ${i === 0 ? 'active' : ''}"></span>`
+            ).join('')}
             </div>
           `
             : ''
@@ -110,10 +111,26 @@ const fetchFeeds = async () => {
 const renderFeed = async () => {
     // 피드 데이터를 서버로부터 불러오기
     const feedList = await fetchFeeds();
-    console.log(feedList)
 
     // feed html 생성
     $feedContainer.innerHTML = feedList.map(feed => createFeedItem(feed)).join('');
+
+    // 각 피드의 이미지 슬라이드에 각각 캐러셀 객체를 적용
+    // 1. 피드의 모든 캐러셀 컨테이너를 가져옴
+    const $carouselContainerList = [...document.querySelectorAll('.carousel-container')]
+
+    // 2. 각각 캐러셀메니저를 걸어줌
+    // 이미지가 2개 이상인 슬라이드만 캐러셀 생성
+
+    $carouselContainerList.forEach(container => {
+
+        const $images = [...container.querySelectorAll('.carousel-track img')]
+
+        if ($images.length > 1) {
+            const carousel = new CarouselManager(container);
+            carousel.initWithImgTag($images)
+        }
+    })
 
 }
 

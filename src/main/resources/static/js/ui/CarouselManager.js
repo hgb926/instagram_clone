@@ -43,6 +43,12 @@ class CarouselManager {
         this.setUpPreview()
     }
 
+    // 이미지 파일 대신 이미지태그를 받아 이벤트처리만 수행하는 함수
+    initWithImgTag($images) {
+        this.slides = $images
+        this.goToSlide(0)
+    }
+
 
     setUpPreview() {
 
