@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostCreate {
+public class PostCreateDto {
 
     @NotBlank(message = "작성자 정보는 필수입니다.")
     private String writer;
