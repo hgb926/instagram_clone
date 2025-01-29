@@ -29,10 +29,22 @@ let elements = {
     $nestedModal: $modal.querySelector('.nested-modal'),
     $deleteBtn: $modal.querySelector('.delete-button'),
     $cancelBtn: $modal.querySelector('.cancel-button'),
+    $loadingSpinner: $modal.querySelector('.loading-spinner')
+}
+
+// 로딩 스피너 처리
+const setLoading = (loading = false) => {
+    const {$loadingSpinner, $backStepBtn, $nextStepBtn} = elements
+
+    $loadingSpinner.style.display = loading ? 'block' : 'none'
+    $backStepBtn.style.visibility = loading ? 'hidden' : 'visible'
+    $nextStepBtn.style.display = loading ? 'none' : 'block'
+
+    $nextStepBtn.disable = loading;
 }
 
 // API 서버에 피드의 내용과 이미지들을 전송
-const fetchFeed = async () => {
+const fetchFeed = () => {
 
     if (currentStep !== 3) return;
     const { $contentTextArea } = elements
@@ -53,19 +65,26 @@ const fetchFeed = async () => {
     selectedFiles.forEach(file => {
         formData.append('images', file)
     })
-    const response = await fetch(`/api/posts`, {
-        method: 'POST',
-        body: formData
-    })
 
-    const data = await response.json()
+    setLoading(true) // 로딩 상태 활성화
 
-    if (response.ok) {
-        window.location.reload()
-    } else {
-        console.error('fail to request')
-        alert(data.message)
-    }
+    setTimeout(async () => {
+        const response = await fetch(`/api/posts`, {
+            method: 'POST',
+            body: formData
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+            window.location.reload()
+        } else {
+            console.error('fail to request')
+            alert(data.message)
+        }
+        setLoading(false)
+    }, 1000)
+
 }
 
 
