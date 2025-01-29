@@ -2,6 +2,8 @@ package com.example.instagramclone.domain.post.entity;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.*;
 
 @Getter
@@ -19,5 +21,6 @@ public class Post {
     private int viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<PostImage> images;
 
 }
