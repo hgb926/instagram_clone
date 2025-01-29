@@ -8,6 +8,9 @@ let currentStep = 1;
 let step2Carousel;
 let step3Carousel
 
+// 선택한 이미지 파일들을 전역관리
+let selectedFiles = null;
+
 // 피드 생성 모달 전역관리
 let $modal = document.getElementById("createPostModal");
 
@@ -26,6 +29,43 @@ let elements = {
     $nestedModal: $modal.querySelector('.nested-modal'),
     $deleteBtn: $modal.querySelector('.delete-button'),
     $cancelBtn: $modal.querySelector('.cancel-button'),
+}
+
+// API 서버에 피드의 내용과 이미지들을 전송
+const fetchFeed = async () => {
+
+    if (currentStep !== 3) return;
+    const { $contentTextArea } = elements
+
+    // 작성자 이름과 피드 내용을 전송
+    const feedData = {
+        writer: '임시사용자',
+        content: $contentTextArea.value.trim()
+    }
+
+    // JSON과 이미지를 같이 전송하려면 form-data가 필요함
+    const formData = new FormData();
+    // blob은 직렬화
+    formData.append('feed', new Blob([JSON.stringify(feedData)], {
+        type: 'application/json'
+    })) // JSON넣기
+
+    selectedFiles.forEach(file => {
+        formData.append('images', file)
+    })
+    const response = await fetch(`/api/posts`, {
+        method: 'POST',
+        body: formData
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+        window.location.reload()
+    } else {
+        console.error('fail to request')
+        alert(data.message)
+    }
 }
 
 
@@ -86,6 +126,9 @@ const setUpFileUploadEvents = () => {
 
         // 파일이 이미지인지 확인
         const validFiles = validateFiles(files)
+
+        // 서버 전송을 위해 전역변수에 저장
+        selectedFiles = validFiles;
 
         // 이미지 슬라이드 생성
         step2Carousel = new CarouselManager($modal.querySelector('.preview-container'));
@@ -183,7 +226,7 @@ const setUpModalEvents = () => {
         if (currentStep < 3) {
             goToStep(currentStep + 1)
         } else {
-            alert('서버로 게시물을 공유합니다.')
+            fetchFeed() // 서버에 요청 전송
         }
     })
 }
