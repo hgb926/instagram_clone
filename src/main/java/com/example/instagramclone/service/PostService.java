@@ -1,6 +1,8 @@
 package com.example.instagramclone.service;
 
-import com.example.instagramclone.domain.post.dto.request.PostCreate;
+import com.example.instagramclone.domain.post.dto.request.PostCreateDto;
+import com.example.instagramclone.domain.post.dto.response.PostImageResponseDto;
+import com.example.instagramclone.domain.post.dto.response.PostResponseDto;
 import com.example.instagramclone.domain.post.entity.Post;
 import com.example.instagramclone.domain.post.entity.PostImage;
 import com.example.instagramclone.repository.PostRepository;
@@ -10,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,18 +23,56 @@ public class PostService {
     private final PostRepository postRepository; // db에 피드내용 저장, 이미지저장
     private final FileUploadUtil fileUploadUtil; // 로컬서버에 이미지 저장
 
+    // 피드 목록조회 중간처리
+    public List<PostResponseDto> findAllFeeds() {
+
+        // 전체 피드 조회
+        List<Post> feedList = postRepository.findAll();
+
+        List<PostResponseDto> responseList = new ArrayList<>();
+        for (Post feed : feedList) {
+            List<PostImage> imageList = postRepository.findImagesByPostId(feed.getId());
+
+            // 이미지 리스트를 rendering DTO로 변환
+            List<PostImageResponseDto> imageResponseList = new ArrayList<>();
+            for (PostImage postImage : imageList) {
+                PostImageResponseDto postImageResponseDto = PostImageResponseDto.builder()
+                        .id(postImage.getId())
+                        .imageUrl(postImage.getImageUrl())
+                        .imageOrder(postImage.getImageOrder())
+                        .build();
+
+                imageResponseList.add(postImageResponseDto);
+            }
+
+            // 응답 DTO 생성
+            PostResponseDto responseDto = PostResponseDto.builder()
+                    .id(feed.getId())
+                    .writer(feed.getWriter())
+                    .content(feed.getContent())
+                    .images(imageResponseList)
+                    .createdAt(feed.getCreatedAt())
+                    .updatedAt(feed.getUpdatedAt())
+                    .build();
+            responseList.add(responseDto);
+        }
+
+        return responseList;
+    }
+
+
     // 피드 생성 DB에 가기 전 후 중간처리
-    public Long createFeed(PostCreate postCreate) {
+    public Long createFeed(PostCreateDto postCreateDto) {
 
         // entity 변환
-        Post post = postCreate.toEntity();
+        Post post = postCreateDto.toEntity();
 
         // 피드게시물을 posts테이블에 insert
         postRepository.saveFeed(post);
 
         // 이미지 관련 처리를 모두 수행
         Long postId = post.getId();
-        processImages(postCreate.getImages(), postId);
+        processImages(postCreateDto.getImages(), postId);
 
         // 컨트롤러에게 결과 반환
         return postId;
