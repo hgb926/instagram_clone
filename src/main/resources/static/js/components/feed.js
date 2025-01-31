@@ -5,6 +5,52 @@ import CarouselManager from "../ui/CarouselManager.js";
 
 const $feedContainer = document.querySelector('.feed-container')
 
+// 피드의 날짜를 조작
+const formatData = (dataString) => {
+    // 날짜문자열을 날짜객체로 변환
+    const date = new Date(dataString)
+
+    // 현재 시간 구함
+    const now = new Date();
+
+    // 두 시간 사이 값을 구함
+    const diff = Math.floor((now - date) / 1000);
+
+    if (diff < 60) return '방금 전'
+    if (diff < 60 * 60) return `${Math.floor(diff / 60)}분 전`
+    if (diff < 60 * 60 * 24) return `${Math.floor(diff / (60 * 60))}시간 전`
+    if (diff < 60 * 60 * 24 * 7) return `${Math.floor(diff / (60 * 60 * 24))}일 전`
+
+    return new Intl.DateTimeFormat(
+        'ko', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }
+    ).format(date)
+}
+
+const truncateContent = (writer, content, maxLength = 20) => {
+    // 1. 먼저 텍스트 길이 체크
+    if (content.length <= maxLength) {
+        return `
+            <a href="#" class="post-username">${writer}</a>
+            <span class="post-caption">${content}</span>
+        `
+    }
+
+    // 2. 긴 텍스트의 경우 처리
+    const truncatedContent = content.substring(0, maxLength)
+
+    return `
+        <a href="#" class="post-username">${writer}</a>
+        <span class="post-caption post-caption-truncated">
+            <span class="truncated-text">${truncatedContent} ...</span>
+            <span class="full-text" style="display: none">${content}</span>
+        </span> 
+        <button class="more-button">더 보기</button>
+    `
+}
 
 // 한개의 피드를 렌더링하는 함수
 function createFeedItem({writer, content, images, createdAt}) {
@@ -82,11 +128,11 @@ function createFeedItem({writer, content, images, createdAt}) {
       <div class="post-content">
         <div class="post-text">
             <!--     피드 내용     -->
-            ${content}
+            ${truncateContent(writer, content)}
         </div>
         <div class="post-time">
             <!--      피드 생성 시간      -->
-            ${createdAt}
+            ${formatData(createdAt)}
         </div>
       </div>
       
@@ -130,6 +176,24 @@ const renderFeed = async () => {
             const carousel = new CarouselManager(container);
             carousel.initWithImgTag($images)
         }
+    })
+
+    // 더 보기 버튼 이벤트 처리
+    const $moreButtons = [...document.querySelectorAll('.more-button')]
+    $moreButtons.forEach($btn => {
+
+        $btn.addEventListener('click', e => {
+            const $captionDiv = $btn.closest('.post-text')
+            const $truncatedSpan = $captionDiv.querySelector('.truncated-text')
+            const $fullSpan = $captionDiv.querySelector('.full-text')
+
+            if ($truncatedSpan && $fullSpan) {
+                $truncatedSpan.style.display = 'none'
+                $fullSpan.style.display = 'inline'
+            }
+            $btn.style.display = 'none'
+        })
+
     })
 
 }
