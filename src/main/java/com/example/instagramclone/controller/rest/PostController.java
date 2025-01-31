@@ -2,7 +2,6 @@ package com.example.instagramclone.controller.rest;
 
 import com.example.instagramclone.domain.post.dto.request.PostCreateDto;
 import com.example.instagramclone.domain.post.dto.response.PostResponseDto;
-import com.example.instagramclone.domain.post.entity.Post;
 import com.example.instagramclone.exception.ErrorCode;
 import com.example.instagramclone.exception.PostException;
 import com.example.instagramclone.service.PostService;
@@ -34,8 +33,6 @@ public class PostController {
                 .body(allFeeds);
     }
 
-
-
     // @RequestPart -
     // 기본적인 header는 content-type: application/json을 쓰지만 그외 (사진, 동영상 등등)의 파일이라면
     // content-type: image/jpg 이런식으로 header를 보내야한다, 그래서 이 두개는 같이 사용할 수 없지만
@@ -52,10 +49,6 @@ public class PostController {
         if (images.size() > 10) {
             throw new PostException(ErrorCode.TOO_MANY_FILES, "파일의 개수는 10개를 초과할 수 없습니다");
         }
-
-        images.forEach(image -> {
-            log.info("uploaded image file name - {}", image.getOriginalFilename());
-        });
 
         postCreateDto.setImages(images);
         log.info("feed create request: POST - {}", postCreateDto);

@@ -1,18 +1,17 @@
 package com.example.instagramclone.service;
 
 import com.example.instagramclone.domain.post.dto.request.PostCreateDto;
-import com.example.instagramclone.domain.post.dto.response.PostImageResponseDto;
 import com.example.instagramclone.domain.post.dto.response.PostResponseDto;
 import com.example.instagramclone.domain.post.entity.Post;
 import com.example.instagramclone.domain.post.entity.PostImage;
 import com.example.instagramclone.repository.PostRepository;
 import com.example.instagramclone.util.FileUploadUtil;
+import com.example.instagramclone.util.HashtagUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,8 +50,22 @@ public class PostService {
         Long postId = post.getId();
         processImages(postCreateDto.getImages(), postId);
 
+        // 해시태그 관련 처리를 수행
+        processHashtags(post);
+
         // 컨트롤러에게 결과 반환
         return postId;
+    }
+
+    // 해시태그 관련 처리 메시드
+    private void processHashtags(Post post) {
+        // 1. 피드 내용에서 해시태그들을 모두 추출 (중복 없이)
+        HashtagUtil.extractHashtags(post.getContent());
+
+        // 2. 해시태그들이 최초등장한 해시태그면 데이터베이스에 저장
+        // 단, 이미 존재하는 해시태그라면 기존의 해시태그를 조회해서 가져옴
+
+        // 3. 해시태그와 피드를 연결해서 연결테이블에 저장
     }
 
     private void processImages(List<MultipartFile> images, Long id) {
