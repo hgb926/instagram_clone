@@ -1,9 +1,12 @@
 package com.example.instagramclone.service;
 
+import com.example.instagramclone.domain.hashtag.entity.Hashtag;
+import com.example.instagramclone.domain.hashtag.entity.PostHashtag;
 import com.example.instagramclone.domain.post.dto.request.PostCreateDto;
 import com.example.instagramclone.domain.post.dto.response.PostResponseDto;
 import com.example.instagramclone.domain.post.entity.Post;
 import com.example.instagramclone.domain.post.entity.PostImage;
+import com.example.instagramclone.repository.HashtagRepository;
 import com.example.instagramclone.repository.PostRepository;
 import com.example.instagramclone.util.FileUploadUtil;
 import com.example.instagramclone.util.HashtagUtil;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +25,9 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final PostRepository postRepository; // db에 피드내용 저장, 이미지저장
+    private final HashtagRepository hashtagRepository; // 해시태그 db에 저장
     private final FileUploadUtil fileUploadUtil; // 로컬서버에 이미지 저장
+    private final HashtagUtil hashtagUtil; // 해시태그 추출기
 
     // 피드 목록조회 중간처리
     public List<PostResponseDto> findAllFeeds() {
@@ -60,12 +66,31 @@ public class PostService {
     // 해시태그 관련 처리 메시드
     private void processHashtags(Post post) {
         // 1. 피드 내용에서 해시태그들을 모두 추출 (중복 없이)
-        HashtagUtil.extractHashtags(post.getContent());
+        Set<String> hashtags = hashtagUtil.extractHashtags(post.getContent());
+        log.info("Hashtags: {}", hashtags);
 
         // 2. 해시태그들이 최초등장한 해시태그면 데이터베이스에 저장
-        // 단, 이미 존재하는 해시태그라면 기존의 해시태그를 조회해서 가져옴
+        hashtags.forEach(hashtagName -> {
 
-        // 3. 해시태그와 피드를 연결해서 연결테이블에 저장
+            // 일단 해시태그가 저장되어있는지 여부를 확인 - 조회 안되면 null을 반환
+            Hashtag foundHashtag = hashtagRepository.findByName(hashtagName);
+
+            if (foundHashtag == null) {
+                // 해시태그 저장 명령
+                foundHashtag = Hashtag.builder().name(hashtagName).build();
+                hashtagRepository.insertHashtag(foundHashtag);
+                log.debug("new hasttag saved : {}" , hashtagName);
+            }
+            // 단, 이미 존재하는 해시태그라면 기존의 해시태그를 조회해서 가져옴
+
+            // 3. 해시태그와 피드를 연결해서 연결테이블에 저장
+            PostHashtag postHashtag = PostHashtag.builder()
+                    .postId(post.getId())
+                    .hashtagId(foundHashtag.getId())
+                    .build();
+            hashtagRepository.insertPostHashtag(postHashtag);
+            log.debug("post hashtag saved : {} ", postHashtag);
+        });
     }
 
     private void processImages(List<MultipartFile> images, Long id) {

@@ -15,7 +15,7 @@ public class HashtagUtil {
     private static final Pattern HASHTAG_PATTERN = Pattern.compile("#(\\w+|[가-힣]+)");
 
     // 주어진 피드 내용에서 해시태그를 중복없이 추출해서 리턴하는 메서드
-    public static Set<String> extractHashtags(String content) {
+    public Set<String> extractHashtags(String content) {
 
         // 해시태그들을 모아놓을 Set을 생성
         Set<String> hashtags = new HashSet<>();
@@ -32,7 +32,6 @@ public class HashtagUtil {
         while (matcher.find()) {
             // 실제 해시태그를 하나씩 추출
             String hashtag = matcher.group();
-            log.debug("hashtag: {}", hashtag);
 
             // 해당 해시태그를 #을 떼고 Set에 저장
             hashtags.add(hashtag.substring(1));
