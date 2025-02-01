@@ -97,7 +97,7 @@ class CarouselManager {
 
         // 인디케이터 변화 업데이트
         const $indicators = [...this.indicatorContainer.children]
-        console.log($indicators)
+
         $indicators.forEach(($ind, idx) => {
             $ind.classList.toggle('active', idx === index)
         })

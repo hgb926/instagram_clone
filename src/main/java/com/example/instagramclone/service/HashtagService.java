@@ -25,6 +25,7 @@ public class HashtagService {
     public List<HashtagSearchResponseDto> searchHashtags(String keyword) {
 
         // 검색어가 null이거나 빈문자열이면 예외를 발생
+        log.info("keyword:  {}", keyword);
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new PostException(ErrorCode.INVALID_HASHTAG_SEARCH, "검색어를 입력해주세요.");
         }
