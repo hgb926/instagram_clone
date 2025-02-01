@@ -10,9 +10,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // 알 수 없는 서버 오류
-    INTERNAL_SERVER_ERROR
-            // 에러코드                         메시지
-            (HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 서버 오류입니다. 점검 후 조치하겠습니다."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 서버 오류입니다. 점검 후 조치하겠습니다."),
 
     // File 관련 오류
     FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
@@ -20,7 +18,11 @@ public enum ErrorCode {
     FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기가 제한을 초과했습니다."),
     TOO_MANY_FILES(HttpStatus.BAD_REQUEST, "파일 개수가 제한을 초과했습니다."),
 
+    // 해시태그 검색관련
+    INVALID_HASHTAG_SEARCH(HttpStatus.BAD_REQUEST, "잘못된 해시태그 검색 요청입니다.")
+
     ;
+
     private final HttpStatus status;
     private final String message;
 
