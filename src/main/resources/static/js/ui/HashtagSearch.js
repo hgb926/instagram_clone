@@ -29,6 +29,12 @@ class HashtagSearch {
                 const searchTimeout = setTimeout(() => {
                     this.fetchHashtagSearch(hashtagMatch.keyword)
                 }, 700);
+
+                // 검색할 해시태그 범위(start, end)를 저장
+                this.currentRange = {
+                    start: hashtagMatch.start,
+                    end: currentCursorPosition,
+                };
             }
         })
     }
@@ -71,7 +77,7 @@ class HashtagSearch {
         this.$suggestionContainer.style.display = 'block';
 
         // 해시태그 클릭시 이벤트
-        // this.addClickEvents();
+        this.addClickEvents();
 
     }
 
@@ -94,7 +100,7 @@ class HashtagSearch {
         // 정규표현식으로 마지막 해시태그를 찾아내서 추출
         const match = beforeCursorText.match(/#[\w가-힣]*$/);
 
-        return match ? {keyword: match[0].substring(1)} : null;
+        return match ? {keyword: match[0].substring(1), start: match.index} : null;
     }
 
     // 해시태그 추천 목록을 만들 컨테이너
@@ -105,6 +111,45 @@ class HashtagSearch {
         return $container;
     }
 
+    /**
+     * 표시된 해시태그 후보(추천)들을 클릭했을 때,
+     * 해당 태그를 실제 textarea에 삽입하기 위한 이벤트를 등록한다.
+     */
+    addClickEvents() {
+        this.$suggestionContainer
+            .querySelectorAll('.hashtag-item')
+            .forEach((item) => {
+                item.addEventListener('click', () => {
+                    // 클릭 시, data-name 속성에 담긴 해시태그 이름 삽입
+                    this.insertHashtag(item.dataset.name);
+                });
+            });
+    }
+
+
+    /**
+     * 추천 목록에서 해시태그를 선택(클릭)했을 때,
+     * 현재 textarea에 해당 태그를 삽입하는 함수
+     *
+     * @param {string} tagName - 선택된 태그 이름
+     */
+    insertHashtag(tagName) {
+        const text = this.$textarea.value;
+
+        // 해시태그가 시작되기 전 구간
+        const beforeHashtag = text.substring(0, this.currentRange.start);
+
+        // 해시태그가 끝난 뒤 구간
+        const afterHashtag = text.substring(this.currentRange.end);
+
+        // 새롭게 구성된 문자열 (해시태그 이름 뒤에 공백 추가)
+        // textarea에 반영
+        this.$textarea.value = `${beforeHashtag}#${tagName} ${afterHashtag}`;
+
+        // 추천 목록 숨기고 포커스 유지
+        this.hideSuggestions();
+        this.$textarea.focus();
+    }
 
 }
 
