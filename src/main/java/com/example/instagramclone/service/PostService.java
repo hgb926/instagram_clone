@@ -72,15 +72,15 @@ public class PostService {
         // 2. 해시태그들이 최초등장한 해시태그면 데이터베이스에 저장
         hashtags.forEach(hashtagName -> {
 
-            // 일단 해시태그가 저장되어있는지 여부를 확인 - 조회 안되면 null을 반환
-            Hashtag foundHashtag = hashtagRepository.findByName(hashtagName);
+            // 일단 해시태그가 저장되어있는지 여부를 확인
+            Hashtag foundHashtag = hashtagRepository.findByName(hashtagName)
+                    .orElseGet(() -> {  // 없으면 (null)~~ 대체적으로 뭘 할지
+                        Hashtag newHashtag = Hashtag.builder().name(hashtagName).build();
+                        hashtagRepository.insertHashtag(newHashtag);
+                        log.debug("new hashtag saved : {}", hashtagName);
+                        return newHashtag;
+                    });
 
-            if (foundHashtag == null) {
-                // 해시태그 저장 명령
-                foundHashtag = Hashtag.builder().name(hashtagName).build();
-                hashtagRepository.insertHashtag(foundHashtag);
-                log.debug("new hasttag saved : {}" , hashtagName);
-            }
             // 단, 이미 존재하는 해시태그라면 기존의 해시태그를 조회해서 가져옴
 
             // 3. 해시태그와 피드를 연결해서 연결테이블에 저장
