@@ -1,4 +1,5 @@
 import { ValidationRules, checkPasswordStrength } from "./validation.js";
+import {debounce} from "../util/debounce.js";
 
 
 const fetchToSignUp = async (userData) => {
@@ -26,9 +27,12 @@ const initSignUp = () => {
         password: $form.querySelector('input[name="password"]'),
     }
 
+    // 디바운스가 걸린 validateField 함수
+    const debounceValidate = debounce(validateField, 700);
+
     const handleInput = ($input) => {
         removeErrorMessage($input.closest('.form-field'))
-        validateField($input) // 입력값 검증 함수 호출
+        debounceValidate($input) // 입력값 검증 함수 호출
     }
 
     Object.values($inputs).forEach($input => {
@@ -79,13 +83,9 @@ const validateField = ($input) => {
     } else {
         // 2. 상세 체크 (패턴검증, 중복검증)
         // 2-1. 이메일, 전화번호 검증
-        if (fieldName === 'email') {
-
-            validateEmailOrPhone($formField, inputValue);
-
-        } else if (fieldName === 'password') {
-
-        }
+        if (fieldName === 'email') validateEmailOrPhone($formField, inputValue)
+        else if (fieldName === 'password') validatePassword($formField, inputValue)
+        else if (fieldName === 'username') validateUsername($formField, inputValue)
     }
 }
 
@@ -100,7 +100,9 @@ const showError = ($formField, message) => {
 const removeErrorMessage = $formField => {
     $formField.classList.remove('error')
     const error = $formField.querySelector('.error-message')
+    const feedback = $formField.querySelector('.password-feedback')
     if (error) error.remove()
+    if (feedback) feedback.remove()
 }
 
 // 이메일 또는 전화번호를 상세검증
@@ -121,6 +123,51 @@ const validateEmailOrPhone = ($formField, inputValue) => {
         } else { // 서버에 통신해서 중복체크
 
         }
+    }
+}
+
+// 비밀번호 검증 (길이, 강도체크)
+const validatePassword = ($formField, inputValue) => {
+    // 길이 확인
+    if (!ValidationRules.password.patterns.length.test(inputValue)) {
+        showError($formField, ValidationRules.password.messages.length)
+    }
+
+    // 강도 체크
+    const strength = checkPasswordStrength(inputValue)
+    switch(strength) {
+        case 'weak': // 에러로 처리
+            showError($formField, ValidationRules.password.messages.weak)
+            break;
+        case 'medium': // 에러 아님
+            showPasswordFeedback(
+                $formField,
+                ValidationRules.password.messages.medium,
+                'warning'
+            )
+            break;
+        case 'strong': // 에러 아님
+            showPasswordFeedback(
+                $formField,
+                ValidationRules.password.messages.strong,
+                'success'
+            )
+            break;
+        default:
+            break;
+    }
+}
+
+const showPasswordFeedback = ($formField, messsage, type) => {
+    const $feedback = document.createElement('span')
+    $feedback.className = `password-feedback ${type}`
+    $feedback.textContent = messsage
+    $formField.append($feedback)
+}
+
+const validateUsername = ($formField, inputValue) => {
+    if (!ValidationRules.username.pattern.test(inputValue)) {
+        showError($formField, ValidationRules.username.message)
     }
 }
 
