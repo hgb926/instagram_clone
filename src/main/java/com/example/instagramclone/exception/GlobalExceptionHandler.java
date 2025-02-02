@@ -3,9 +3,9 @@ package com.example.instagramclone.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDateTime;
 
@@ -33,9 +33,53 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    // 입력값 검증 예외처리
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e, HttpServletRequest request) {
+        log.error("Validation error occurred: {}", e.getMessage(), e);
+
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .get(0)
+                .getDefaultMessage();
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(e.getStatusCode().value())
+                .error(e.getStatusCode().toString())
+                .message(errorMessage)
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(response);
+    }
+
     @ExceptionHandler(PostException.class)
     public ResponseEntity<?> handlePostException(PostException e, HttpServletRequest request) {
         log.error("PostException occurred: {}", e.getMessage(), e);
+
+        ErrorResponse response = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(e.getErrorCode().getStatus().value())
+                .error(e.getErrorCode().name())
+                .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(response);
+    }
+
+    // 회원관련
+    @ExceptionHandler(MemberException.class)
+    public ResponseEntity<ErrorResponse> handleMemberException(
+            MemberException e, HttpServletRequest request) {
+
+        log.error("MemberException occurred: {}", e.getMessage(), e);
 
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
