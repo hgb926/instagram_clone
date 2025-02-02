@@ -1,7 +1,10 @@
 package com.example.instagramclone.service;
 
 import com.example.instagramclone.domain.member.dto.request.SignUpRequestDto;
+import com.example.instagramclone.domain.member.dto.response.DuplicateCheckResponseDto;
 import com.example.instagramclone.domain.member.entity.Member;
+import com.example.instagramclone.exception.ErrorCode;
+import com.example.instagramclone.exception.MemberException;
 import com.example.instagramclone.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,31 @@ public class MemberService {
 
         // 회원정보를 데이터베이스에 저장
         memberRepository.insert(newMember);
+    }
+
+    /**
+     * 중복 검사 통합 처리 (이메일, 전화번호, 유저네임)
+     * @param type - 검사할 값의 타입 (email, phone, username)
+     * @param value - 실제로 중복을 검사할 값
+     */
+    public DuplicateCheckResponseDto checkDuplicate(String type, String value) {
+        switch (type) {
+            case "email":
+                // 중복된 경우를 클라이언트에게 알려야 함
+                return memberRepository.findByEmail(value)
+                        .map(m -> DuplicateCheckResponseDto.unavailable("이미 사용 중인 이메일입니다."))
+                        .orElse(DuplicateCheckResponseDto.available());
+            case "phone":
+                return memberRepository.findByPhone(value)
+                        .map(m -> DuplicateCheckResponseDto.unavailable("이미 사용 중인 전화번호입니다."))
+                        .orElse(DuplicateCheckResponseDto.available());
+            case "username":
+                return memberRepository.findByUsername(value)
+                        .map(m -> DuplicateCheckResponseDto.unavailable("이미 사용 중인 사용자 이름입니다."))
+                        .orElse(DuplicateCheckResponseDto.available());
+            default:
+                throw new MemberException(ErrorCode.INVALID_SIGNUP_DATA);
+        }
     }
 
 }

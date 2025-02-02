@@ -158,10 +158,10 @@ const validatePassword = ($formField, inputValue) => {
     }
 }
 
-const showPasswordFeedback = ($formField, messsage, type) => {
+const showPasswordFeedback = ($formField, message, type) => {
     const $feedback = document.createElement('span')
     $feedback.className = `password-feedback ${type}`
-    $feedback.textContent = messsage
+    $feedback.textContent = message
     $formField.append($feedback)
 }
 
