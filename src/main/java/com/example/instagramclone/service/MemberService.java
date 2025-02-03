@@ -99,10 +99,21 @@ public class MemberService {
         String username = dto.getUsername();
 
         // 1
+//        Member foundMember = memberRepository.findByEmail(username)
+//                .orElseThrow(
+//                        () -> new MemberException(ErrorCode.MEMBER_NOT_FOUND, "존재하지 않는 회원입니다.")
+//                );// 조회가 실패했다면 예외 발생
+
+        // 이메일, 유저네임, 폰번호로 로그인 하는 방법
         Member foundMember = memberRepository.findByEmail(username)
-                .orElseThrow(
-                        () -> new MemberException(ErrorCode.MEMBER_NOT_FOUND, "존재하지 않는 회원입니다.")
-                );// 조회가 실패했다면 예외 발생
+                .orElseGet(() -> memberRepository.findByUsername(username)
+                        .orElseGet(() -> memberRepository.findByPhone(username)
+                                .orElseThrow(
+                                        () -> new MemberException(ErrorCode.MEMBER_NOT_FOUND)
+                                ))
+                ); // 만약에 발견이 안되면 다시 조회하겠다.
+
+
 
         // 사용자가 입력한 패스워드와 DB에 저장된 패스워드를 추출
         String inputPassword = dto.getPassword();
