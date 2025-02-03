@@ -1,5 +1,6 @@
 package com.example.instagramclone.controller.rest;
 
+import com.example.instagramclone.domain.member.dto.request.LoginRequestDto;
 import com.example.instagramclone.domain.member.dto.request.SignUpRequestDto;
 import com.example.instagramclone.domain.member.dto.response.DuplicateCheckResponseDto;
 import com.example.instagramclone.service.MemberService;
@@ -39,6 +40,14 @@ public class AuthController {
         log.info("check type : {}, value : {}", type, value);
         DuplicateCheckResponseDto responseDto = memberService.checkDuplicate(type, value);
         return ResponseEntity.ok().body(responseDto);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDto loginRequest) {
+
+        log.info("request for login: {}", loginRequest.getUsername());
+        Map<String, Object> responseMap = memberService.authenticate(loginRequest);
+        return ResponseEntity.ok().body(responseMap);
     }
 
 }
