@@ -41,7 +41,8 @@ public class SignUpRequestDto {
             email = this.emailOrPhone;
         } else {
             // 전화번호에 있는 특수기호를 모두 제거    숫자가 아니면        다 지움
-            phone = this.emailOrPhone.replaceAll("[^0-9]}", "");
+            phone = this.emailOrPhone.replaceAll("[^0-9]", "");
+            System.out.println("remove chars phone number = " + phone);
         }
 
         return Member.builder()

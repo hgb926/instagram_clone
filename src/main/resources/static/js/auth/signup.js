@@ -105,14 +105,26 @@ const removeErrorMessage = $formField => {
     if (feedback) feedback.remove()
 }
 
+// 서버에 중복체크 요청을 보내고 결과를 반환
+const fetchToCheckDuplicate = async (type, value, $formField) => {
+    const response = await fetch(`api/auth/check-duplicate?type=${type}&value=${value}`)
+    const data = await response.json()
+    if (!data.available) {
+        showError($formField, data.message)
+    }
+}
+
+
+
 // 이메일 또는 전화번호를 상세검증
-const validateEmailOrPhone = ($formField, inputValue) => {
+const validateEmailOrPhone = async ($formField, inputValue) => {
 
     // 이메일 체크
     if (inputValue.includes('@')) {
         if (!ValidationRules.email.pattern.test(inputValue)) { // 패턴 체크
             showError($formField, ValidationRules.email.message)
         } else { // 서버에 통신해서 중복체크
+            await fetchToCheckDuplicate('email', inputValue, $formField);
 
         }
     } else {
@@ -121,7 +133,7 @@ const validateEmailOrPhone = ($formField, inputValue) => {
         if (!ValidationRules.phone.pattern.test(numbers)) { // 패턴 체크
             showError($formField, ValidationRules.phone.message)
         } else { // 서버에 통신해서 중복체크
-
+            await fetchToCheckDuplicate('phone', inputValue, $formField);
         }
     }
 }
@@ -165,10 +177,11 @@ const showPasswordFeedback = ($formField, message, type) => {
     $formField.append($feedback)
 }
 
-const validateUsername = ($formField, inputValue) => {
+const validateUsername = async ($formField, inputValue) => {
     if (!ValidationRules.username.pattern.test(inputValue)) {
         showError($formField, ValidationRules.username.message)
     }
+    await fetchToCheckDuplicate('username', inputValue, $formField);
 }
 
 // -------- 메인실행 코드 --------- //
