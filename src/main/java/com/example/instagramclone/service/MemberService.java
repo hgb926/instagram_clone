@@ -6,6 +6,7 @@ import com.example.instagramclone.domain.member.dto.response.DuplicateCheckRespo
 import com.example.instagramclone.domain.member.entity.Member;
 import com.example.instagramclone.exception.ErrorCode;
 import com.example.instagramclone.exception.MemberException;
+import com.example.instagramclone.jwt.JwtTokenProvider;
 import com.example.instagramclone.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입 중간처리
     public void signUp(SignUpRequestDto dto) {
@@ -124,10 +126,11 @@ public class MemberService {
             throw new MemberException(ErrorCode.INVALID_PASSWORD);
         }
 
-        // 로그인이 성공했을 때
+        // 로그인이 성공했을 때 액세스 토큰을 전송
         return Map.of(
                 "message", "로그인에 성공했습니다.",
-                "username", foundMember.getUsername()
+                "username", foundMember.getUsername(),
+                "accessToken", jwtTokenProvider.createAccessToken(foundMember.getUsername())
         );
     }
 
