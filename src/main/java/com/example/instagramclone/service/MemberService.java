@@ -24,6 +24,26 @@ public class MemberService {
     // 회원가입 중간처리
     public void signUp(SignUpRequestDto dto) {
 
+        /*
+            Race condition 방지
+
+            사용자가 중복체크 후 회원가입 버튼을 누르기 전까지의 시간동안
+            다른 사용자가 같은 값으로 가입할 수 있음
+            이를 최종회원가입에서 한번 더 검사해서 방지
+         */
+        String emailOrPhone = dto.getEmailOrPhone();
+        if (emailOrPhone.contains("@")) {
+            memberRepository.findByEmail(emailOrPhone)
+                    .ifPresent(m -> {throw new MemberException(ErrorCode.DUPLICATE_EMAIL);});
+        } else {
+            memberRepository.findByPhone(emailOrPhone)
+                    .ifPresent(m -> {throw new MemberException(ErrorCode.DUPLICATE_PHONE);});
+        }
+
+        memberRepository.findByUsername(dto.getUsername())
+                .ifPresent(m -> {throw new MemberException(ErrorCode.DUPLICATE_USERNAME);});
+
+
         // 순수 비밀번호
         String rawPassword = dto.getPassword();
         // 암호화된 패스워드
@@ -40,7 +60,8 @@ public class MemberService {
 
     /**
      * 중복 검사 통합 처리 (이메일, 전화번호, 유저네임)
-     * @param type - 검사할 값의 타입 (email, phone, username)
+     *
+     * @param type  - 검사할 값의 타입 (email, phone, username)
      * @param value - 실제로 중복을 검사할 값
      */
     public DuplicateCheckResponseDto checkDuplicate(String type, String value) {
